@@ -4,20 +4,15 @@ const cors = require("cors")
 app.use(cors())
 var http = require("http").createServer(app)
 var io = require("socket.io")(http)
-const cards = require("./cards")
-const { initializeGame, shuffle } = require("./utilities")
 
-const CARDS_IN_HAND = 10
+const { initGame } = require("./utilities")
 
-let game = initializeGame(
-    ["Base", "CAHe1", "CAHe2", "CAHe3", "CAHe4", "CAHe5", "CAHe6"],
-    cards
-)
+let game = initGame()
 
 app.use(express.static("public"))
 
 app.get("/", function(req, res) {
-    res.sendFile(__dirname + "/public/index.html")
+    res.send("'Dungueons and Dragons' is listening")
 })
 
 io.on("connection", function(socket) {
