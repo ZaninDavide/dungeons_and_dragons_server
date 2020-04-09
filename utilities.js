@@ -1,5 +1,18 @@
 function initGame(){
-    return {}
+    return {
+        players: [],
+        enemies: [],
+        walls: [],
+    }
 }
 
-module.exports = { initGame }
+function newPlayer(socket, name, max_hp = 15){
+    return {
+        socket,
+        name,
+        max_hp: max_hp,
+        hp: max_hp,
+    }
+}
+
+module.exports = { initGame, newPlayer }
