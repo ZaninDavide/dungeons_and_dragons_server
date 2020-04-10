@@ -73,6 +73,15 @@ io.on("connection", function(socket) {
             players: game.players.map(sendablePlayer),
         })
     })
+
+    socket.on("color", function(name, new_color){
+        const player = game.players.filter(player => player.name === name)[0]
+        player.color = new_color
+
+        io.emit("players", {
+            players: game.players.map(sendablePlayer),
+        })
+    })
 })
 
 http.listen(process.env.PORT || 5000, function() {
