@@ -6,7 +6,7 @@ function initGame(){
     }
 }
 
-function newPlayer(socket, name, max_hp = 15, x = 0, y = 0, color = "blue"){
+function newPlayer(socket, name, max_hp = 15, ca = 10, x = 0, y = 0, color = "#ff6363"){
     return {
         socket,
         name,
@@ -15,6 +15,7 @@ function newPlayer(socket, name, max_hp = 15, x = 0, y = 0, color = "blue"){
         x,
         y,
         color,
+        ca,
     }
 }
 
@@ -26,6 +27,7 @@ function sendablePlayer(player){
         x: player.x,
         y: player.y,
         color: player.color,
+        ca: player.ca,
     }
 }
 

@@ -19,10 +19,6 @@ app.get("/players", function(req, res) {
     res.send(game.players.map(sendablePlayer))
 })
 
-app.get("/players", function(req, res) {
-    res.send(game.players.map(c => c.name))
-})
-
 io.on("connection", function(socket) {
     console.log("New connection")
 
@@ -52,6 +48,7 @@ io.on("connection", function(socket) {
         if (socket.player_name === undefined) return
 
         const player = game.players.filter(player => player.name === socket.player_name)[0]
+        if(!player) return
         const name = player.name.toString()
 
         // remove player from game.players
@@ -65,6 +62,16 @@ io.on("connection", function(socket) {
         })
 
         console.log("'" + name + "' disconnected")
+    })
+
+    socket.on("move", function(name, new_x, new_y){
+        const player = game.players.filter(player => player.name === name)[0]
+        player.x = new_x
+        player.y = new_y
+
+        io.emit("players", {
+            players: game.players.map(sendablePlayer),
+        })
     })
 })
 
