@@ -6,7 +6,21 @@ function initGame(){
     }
 }
 
-function newPlayer(socket, name, max_hp = 15, ca = 10, x = 0, y = 0, color = "#ff6363"){
+function isFree(game, x, y){
+    return game.players.filter(p => p.x === x && p.y === y).length === 0
+}
+
+function firstEmptyCell(game){
+    let x = 0
+    let free = false
+    while(!free){
+        if(isFree(game, x, 0)) free = true
+        x++
+    }
+    return {x: x-1, y: 0}
+}
+
+function newPlayer(socket, name, x = 0, y = 0, max_hp = 15, ca = 10, color = "#61ADFF"){
     return {
         socket,
         name,
@@ -31,4 +45,4 @@ function sendablePlayer(player){
     }
 }
 
-module.exports = { initGame, newPlayer, sendablePlayer }
+module.exports = { initGame, newPlayer, sendablePlayer, firstEmptyCell }

@@ -5,7 +5,7 @@ app.use(cors())
 var http = require("http").createServer(app)
 var io = require("socket.io")(http)
 
-const { initGame, newPlayer, sendablePlayer } = require("./utilities")
+const { initGame, newPlayer, sendablePlayer, firstEmptyCell } = require("./utilities")
 
 let game = initGame()
 
@@ -30,7 +30,8 @@ io.on("connection", function(socket) {
         // socket.emit("walls",   {   walls: game.walls   })
 
         // create a new player
-        let new_player = newPlayer(socket, name)
+        let firstFree = firstEmptyCell(game)
+        let new_player = newPlayer(socket, name, firstFree.x, firstFree.y)
 
         socket.player_name = name
         
