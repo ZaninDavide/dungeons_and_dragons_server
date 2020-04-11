@@ -21,6 +21,7 @@ app.get("/players", function(req, res) {
 
 io.on("connection", function(socket) {
     console.log("New connection")
+    socket.emit("players", { players: game.players.map(sendablePlayer) })
 
     socket.on("join game", function(name) {
         // send game data to app
@@ -78,6 +79,15 @@ io.on("connection", function(socket) {
         const player = game.players.filter(player => player.name === name)[0]
         player.color = new_color
 
+        io.emit("players", {
+            players: game.players.map(sendablePlayer),
+        })
+    })
+
+    socket.on("hp_delta", function(name, delta){
+        const player = game.players.filter(player => player.name === name)[0]
+        player.hp += delta
+        
         io.emit("players", {
             players: game.players.map(sendablePlayer),
         })
