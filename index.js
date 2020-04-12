@@ -5,7 +5,7 @@ app.use(cors())
 var http = require("http").createServer(app)
 var io = require("socket.io")(http)
 
-const { initGame, newPlayer, sendablePlayer, firstEmptyCell } = require("./utilities")
+const { initGame, newPlayer, sendablePlayer, firstEmptyCell, newEnemy, newSpecies } = require("./utilities")
 
 let game = initGame()
 
@@ -19,9 +19,19 @@ app.get("/players", function(req, res) {
     res.send(game.players.map(sendablePlayer))
 })
 
+app.get("/stupidClearEnemies", function(req, res) {
+    game.enemies = []
+    io.emit("enemies", { enemies: game.enemies })
+    console.log("Emenies deleted")
+    res.send("Emenies deleted")
+})
+
 io.on("connection", function(socket) {
     console.log("New connection")
+
     socket.emit("players", { players: game.players.map(sendablePlayer) })
+    socket.emit("enemies", { enemies: game.enemies })
+    socket.emit("species", { species: game.species })
 
     socket.on("join game", function(name) {
         // send game data to app
@@ -67,31 +77,69 @@ io.on("connection", function(socket) {
     })
 
     socket.on("move", function(name, new_x, new_y){
-        const player = game.players.filter(player => player.name === name)[0]
-        player.x = new_x
-        player.y = new_y
+        let entity = game.players.filter(player => player.name === name)[0]
+        if(!entity) entity = game.enemies.filter(enemy => enemy.name === name)[0]
+        
+        if(!entity) return
+        entity.x = new_x
+        entity.y = new_y
 
-        io.emit("players", {
-            players: game.players.map(sendablePlayer),
-        })
+        if(entity.type === "player"){
+            io.emit("players", { players: game.players.map(sendablePlayer) })
+        }else if(entity.type === "enemy"){
+            io.emit("enemies", { enemies: game.enemies })
+        }
     })
 
     socket.on("color", function(name, new_color){
-        const player = game.players.filter(player => player.name === name)[0]
-        player.color = new_color
+        let entity = game.players.filter(player => player.name === name)[0]
+        if(!entity) entity = game.enemies.filter(enemy => enemy.name === name)[0]
+        
+        if(!entity) return
+        entity.color = new_color
 
-        io.emit("players", {
-            players: game.players.map(sendablePlayer),
-        })
+        if(entity.type === "player"){
+            io.emit("players", { players: game.players.map(sendablePlayer) })
+        }else if(entity.type === "enemy"){
+            io.emit("enemies", { enemies: game.enemies })
+        }
     })
 
     socket.on("hp_delta", function(name, delta){
-        const player = game.players.filter(player => player.name === name)[0]
-        player.hp += delta
+        let entity = game.players.filter(player => player.name === name)[0]
+        if(!entity) entity = game.enemies.filter(enemy => enemy.name === name)[0]
         
-        io.emit("players", {
-            players: game.players.map(sendablePlayer),
-        })
+        if(!entity) return
+        entity.hp += delta
+
+        if(entity.type === "player"){
+            io.emit("players", { players: game.players.map(sendablePlayer) })
+        }else if(entity.type === "enemy"){
+            io.emit("enemies", { enemies: game.enemies })
+        }
+    })
+
+    socket.on("newEnemy", function(name, species) {
+        // create a new enemy
+        let firstFree = firstEmptyCell(game)
+        let new_enemy = newEnemy(name, species, firstFree.x, firstFree.y, game.species[species].max_hp,  game.species[species].ca)
+
+        // add this player to the players list
+        game.enemies.push(new_enemy)
+
+        // tell everyone else about the new enemy
+        io.emit("enemies", { enemies: game.enemies })
+
+        console.log("'" + name + "' new enemy added")
+    })
+
+    socket.on("newSpecies", function(name, max_hp, ca) {
+        let sp = newSpecies(name, max_hp, ca)
+        game.species[name] = sp
+
+        io.emit("species", { species: game.species })
+
+        console.log("'" + name + "' new species added")
     })
 })
 

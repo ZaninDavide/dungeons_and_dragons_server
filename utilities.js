@@ -2,12 +2,14 @@ function initGame(){
     return {
         players: [],
         enemies: [],
+        species: {},
           walls: [],
     }
 }
 
 function isFree(game, x, y){
-    return game.players.filter(p => p.x === x && p.y === y).length === 0
+    return  game.players.filter(p => p.x === x && p.y === y).length === 0 && 
+            game.enemies.filter(e => e.x === x && e.y === y).length === 0
 }
 
 function firstEmptyCell(game){
@@ -30,6 +32,30 @@ function newPlayer(socket, name, x = 0, y = 0, max_hp = 15, ca = 10, color = "#6
         y,
         color,
         ca,
+        type: "player",
+        master: false,
+    }
+}
+
+function newEnemy(name, species = "zombie", x = 0, y = 0, max_hp = 10, ca = 12, color = "#f3c623"){
+    return {
+        name,
+        species,
+        max_hp: max_hp,
+        hp: max_hp,
+        x,
+        y,
+        color,
+        ca,
+        type: "enemy",
+    }
+}
+
+function newSpecies(name, max_hp, ca){
+    return {
+        name,
+        max_hp,
+        ca
     }
 }
 
@@ -42,7 +68,9 @@ function sendablePlayer(player){
         y: player.y,
         color: player.color,
         ca: player.ca,
+        type: player.type,
+        master: player.master,
     }
 }
 
-module.exports = { initGame, newPlayer, sendablePlayer, firstEmptyCell }
+module.exports = { initGame, newPlayer, sendablePlayer, firstEmptyCell, newEnemy, newSpecies }
