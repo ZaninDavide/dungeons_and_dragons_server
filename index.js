@@ -115,6 +115,10 @@ io.on("connection", function(socket) {
         if(entity.type === "player"){
             io.emit("players", { players: game.players.map(sendablePlayer) })
         }else if(entity.type === "enemy"){
+            if(entity.hp <= 0){
+                // remove enemy
+                game.enemies = game.enemies.filter(enemy => enemy.name !== name)
+            }
             io.emit("enemies", { enemies: game.enemies })
         }
     })
