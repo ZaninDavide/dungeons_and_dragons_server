@@ -74,9 +74,7 @@ function sendablePlayer(player){
 }
 
 function firstFreeName(enemies, species){
-    let allNames = enemies.reduce((acc, en) => {
-        if(en.species === species) return [...acc, en.name]
-    }, [])
+    let allNames = enemies.reduce((acc, en) => [...acc, en.name], [])
     let name = ""
     let n = 1
     while(!name){
