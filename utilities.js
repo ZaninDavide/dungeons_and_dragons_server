@@ -37,7 +37,7 @@ function newPlayer(socket, name, x = 0, y = 0, max_hp = 15, ca = 10, color = "#6
     }
 }
 
-function newEnemy(name, species = "zombie", x = 0, y = 0, max_hp = 10, ca = 12, color = "#f3c623"){
+function newEnemy(name, species = "zombie", x = 0, y = 0, max_hp = 10, ca = 12){
     return {
         name,
         species,
@@ -45,17 +45,17 @@ function newEnemy(name, species = "zombie", x = 0, y = 0, max_hp = 10, ca = 12, 
         hp: max_hp,
         x,
         y,
-        color,
         ca,
         type: "enemy",
     }
 }
 
-function newSpecies(name, max_hp, ca){
+function newSpecies(name, max_hp, ca, color = "#f3c623"){
     return {
         name,
         max_hp,
-        ca
+        ca,
+        color,
     }
 }
 

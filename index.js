@@ -132,7 +132,7 @@ io.on("connection", function(socket) {
 
         console.log("'" + name + "' new enemy added")
     })
-
+    
     socket.on("newSpecies", function(name, max_hp, ca) {
         let sp = newSpecies(name, max_hp, ca)
         game.species[name] = sp
@@ -140,6 +140,17 @@ io.on("connection", function(socket) {
         io.emit("species", { species: game.species })
 
         console.log("'" + name + "' new species added")
+    })
+
+    socket.on("speciesColor", function(species_name, new_color) {
+        let sp = game.species[species_name]
+        if(!sp) return
+
+        sp.color = new_color
+
+        io.emit("species", { species: game.species })
+
+        console.log("Species '" + species_name + "' color changed")
     })
 })
 
