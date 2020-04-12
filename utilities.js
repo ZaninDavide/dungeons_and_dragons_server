@@ -73,4 +73,24 @@ function sendablePlayer(player){
     }
 }
 
-module.exports = { initGame, newPlayer, sendablePlayer, firstEmptyCell, newEnemy, newSpecies }
+function firstFreeName(enemies, species){
+    let allNames = enemies.reduce((acc, en) => {
+        if(en.species === species) return [...acc, en.name]
+    }, [])
+    let name = ""
+    let n = 1
+    while(!name){
+        if(allNames.length === 0){
+            name = species[0].toUpperCase() + "1"
+        }else{
+            if(allNames.indexOf(species[0].toUpperCase() + n.toString()) === -1){
+                name = species[0].toUpperCase() + n.toString()
+            }else{
+                n++
+            }
+        }
+    }
+    return name
+}
+
+module.exports = { initGame, newPlayer, sendablePlayer, firstEmptyCell, newEnemy, newSpecies, firstFreeName }

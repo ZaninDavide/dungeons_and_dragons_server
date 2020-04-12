@@ -5,7 +5,7 @@ app.use(cors())
 var http = require("http").createServer(app)
 var io = require("socket.io")(http)
 
-const { initGame, newPlayer, sendablePlayer, firstEmptyCell, newEnemy, newSpecies } = require("./utilities")
+const { initGame, newPlayer, sendablePlayer, firstEmptyCell, newEnemy, newSpecies, firstFreeName } = require("./utilities")
 
 let game = initGame()
 
@@ -123,9 +123,10 @@ io.on("connection", function(socket) {
         }
     })
 
-    socket.on("newEnemy", function(name, species) {
+    socket.on("newEnemy", function(species) {
         // create a new enemy
         let firstFree = firstEmptyCell(game)
+        let name = firstFreeName(game.enemies, species)
         let new_enemy = newEnemy(name, species, firstFree.x, firstFree.y, game.species[species].max_hp,  game.species[species].ca)
 
         // add this player to the players list
