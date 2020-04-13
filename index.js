@@ -115,10 +115,11 @@ io.on("connection", function(socket) {
         if(entity.type === "player"){
             io.emit("players", { players: game.players.map(sendablePlayer) })
         }else if(entity.type === "enemy"){
-            if(entity.hp <= 0){
+            /*if(entity.hp <= 0){
                 // remove enemy
                 game.enemies = game.enemies.filter(enemy => enemy.name !== name)
-            }
+
+            }*/
             io.emit("enemies", { enemies: game.enemies })
         }
     })
@@ -157,6 +158,27 @@ io.on("connection", function(socket) {
 
         console.log("Species '" + species_name + "' color changed")
     })
+
+    socket.on("removeEnemie", function(name) {
+        game.enemies = game.enemies.filter(enemy => enemy.name !== name)
+        io.emit("enemies", { enemies: game.enemies })
+        console.log("'" + name + "' removed.")
+    })
+
+    socket.on("changePlayerMaxHp", function(name, max) {
+        let player = game.players.filter(player => player.name === name)[0]
+        player.max_hp = max
+        io.emit("players", { players: game.players.map(sendablePlayer) })
+        console.log("'" + name + "' set max_hp to:" + max)
+    })
+
+    socket.on("changePlayerCA", function(name, ca) {
+        let player = game.players.filter(player => player.name === name)[0]
+        player.ca = ca
+        io.emit("players", { players: game.players.map(sendablePlayer) })
+        console.log("'" + name + "' set ca to:" + ca)
+    })
+
 })
 
 http.listen(process.env.PORT || 5000, function() {
