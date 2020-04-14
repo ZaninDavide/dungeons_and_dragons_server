@@ -9,7 +9,8 @@ function initGame(){
 
 function isFree(game, x, y){
     return  game.players.filter(p => p.x === x && p.y === y).length === 0 && 
-            game.enemies.filter(e => e.x === x && e.y === y).length === 0
+            game.enemies.filter(e => e.x === x && e.y === y).length === 0 &&
+            game.walls.filter(  w => w.x === x && w.y === y).length === 0
 }
 
 function firstEmptyCell(game){
@@ -59,6 +60,14 @@ function newSpecies(name, max_hp, ca, color = "#f3c623"){
     }
 }
 
+function newWall(x, y){
+    return {
+        x,
+        y,
+        type: "wall",
+    }
+}
+
 function sendablePlayer(player){
     return {
         name: player.name,
@@ -91,4 +100,4 @@ function firstFreeName(enemies, species){
     return name
 }
 
-module.exports = { initGame, newPlayer, sendablePlayer, firstEmptyCell, newEnemy, newSpecies, firstFreeName }
+module.exports = { initGame, newPlayer, sendablePlayer, firstEmptyCell, newEnemy, newSpecies, firstFreeName, newWall }

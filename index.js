@@ -5,7 +5,7 @@ app.use(cors())
 var http = require("http").createServer(app)
 var io = require("socket.io")(http)
 
-const { initGame, newPlayer, sendablePlayer, firstEmptyCell, newEnemy, newSpecies, firstFreeName } = require("./utilities")
+const { initGame, newPlayer, sendablePlayer, firstEmptyCell, newEnemy, newSpecies, firstFreeName, newWall } = require("./utilities")
 
 let game = initGame()
 
@@ -19,12 +19,12 @@ app.get("/players", function(req, res) {
     res.send(game.players.map(sendablePlayer))
 })
 
-app.get("/stupidClearEnemies", function(req, res) {
+/*app.get("/stupidClearEnemies", function(req, res) {
     game.enemies = []
     io.emit("enemies", { enemies: game.enemies })
     console.log("Emenies deleted")
     res.send("Emenies deleted")
-})
+})*/
 
 io.on("connection", function(socket) {
     console.log("New connection")
@@ -32,12 +32,14 @@ io.on("connection", function(socket) {
     socket.emit("players", { players: game.players.map(sendablePlayer) })
     socket.emit("enemies", { enemies: game.enemies })
     socket.emit("species", { species: game.species })
+    socket.emit(  "walls", { walls: game.walls })
 
     socket.on("join game", function(name) {
         // send game data to app
         socket.emit("players", { players: game.players.map(sendablePlayer) })
-        // socket.emit("enemies", { enemies: game.enemies })
-        // socket.emit("walls",   {   walls: game.walls   })
+        socket.emit("enemies", { enemies: game.enemies })
+        socket.emit("species", { species: game.species })
+        socket.emit("walls",   {   walls: game.walls   })
 
         // create a new player
         let firstFree = firstEmptyCell(game)
@@ -177,6 +179,16 @@ io.on("connection", function(socket) {
         player.ca = ca
         io.emit("players", { players: game.players.map(sendablePlayer) })
         console.log("'" + name + "' set ca to:" + ca)
+    })
+
+    socket.on("addWall", function(x, y) {
+        game.walls.push(newWall(x, y))
+        io.emit("walls", { walls: game.walls })
+    })
+
+    socket.on("removeWall", function(x, y) {
+        game.walls = game.walls.filter(w => w.x !== x || w.y !== y)
+        io.emit("walls", { walls: game.walls })
     })
 
 })
