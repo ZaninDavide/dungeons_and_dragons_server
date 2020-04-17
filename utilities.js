@@ -23,7 +23,7 @@ function firstEmptyCell(game){
     return {x: x-1, y: 0}
 }
 
-function newPlayer(socket, name, x = 0, y = 0, max_hp = 15, ca = 10, color = "#61ADFF"){
+function newPlayer(socket, name, x = 0, y = 0, max_hp = 15, ca = 10, ini = 3, color = "#61ADFF"){
     return {
         socket,
         name,
@@ -33,6 +33,7 @@ function newPlayer(socket, name, x = 0, y = 0, max_hp = 15, ca = 10, color = "#6
         y,
         color,
         ca,
+        ini,
         type: "player",
         master: false,
     }
@@ -77,6 +78,7 @@ function sendablePlayer(player){
         y: player.y,
         color: player.color,
         ca: player.ca,
+        ini: player.ini,
         type: player.type,
         master: player.master,
     }

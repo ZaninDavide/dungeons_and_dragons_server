@@ -171,24 +171,42 @@ io.on("connection", function(socket) {
         let player = game.players.filter(player => player.name === name)[0]
         player.max_hp = max
         io.emit("players", { players: game.players.map(sendablePlayer) })
-        console.log("'" + name + "' set max_hp to:" + max)
+        console.log("'" + name + "' set max_hp to: " + max)
     })
 
     socket.on("changePlayerCA", function(name, ca) {
         let player = game.players.filter(player => player.name === name)[0]
         player.ca = ca
         io.emit("players", { players: game.players.map(sendablePlayer) })
-        console.log("'" + name + "' set ca to:" + ca)
+        console.log("'" + name + "' set ca to: " + ca)
+    })
+
+    socket.on("changePlayerIni", function(name, ini) {
+        let player = game.players.filter(player => player.name === name)[0]
+        player.ini = ini
+        io.emit("players", { players: game.players.map(sendablePlayer) })
+        console.log("'" + name + "' set initiative to: " + ini)
     })
 
     socket.on("addWall", function(x, y) {
-        game.walls.push(newWall(x, y))
-        io.emit("walls", { walls: game.walls })
+        let exists = false
+        game.walls.forEach(w => {
+            if(w.x === x && w.y === y) {
+                exists = true
+            }
+        })
+        if(!exists){
+            game.walls.push(newWall(x, y))
+            io.emit("walls", { walls: game.walls })
+        }
     })
 
     socket.on("removeWall", function(x, y) {
-        game.walls = game.walls.filter(w => w.x !== x || w.y !== y)
-        io.emit("walls", { walls: game.walls })
+        let new_walls = game.walls.filter(w => w.x !== x || w.y !== y)
+        if(new_walls.length < game.walls.length){
+            game.walls = new_walls
+            io.emit("walls", { walls: game.walls })
+        }
     })
 
 })
