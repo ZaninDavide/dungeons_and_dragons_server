@@ -15,8 +15,14 @@ app.get("/", function(req, res) {
     res.send("'Dungueons and Dragons' is listening")
 })
 
-app.get("/players", function(req, res) {
-    res.send(game.players.map(sendablePlayer))
+app.get("/game", function(req, res) {
+    let sendableGame = {
+        players: game.players.map(sendablePlayer),
+        enemies: game.enemies,
+        species: game.species,
+        walls  : game.walls,
+    }
+    res.send(sendableGame)
 })
 
 /*app.get("/stupidClearEnemies", function(req, res) {
@@ -36,26 +42,42 @@ io.on("connection", function(socket) {
 
     socket.on("join game", function(name) {
         // send game data to app
-        socket.emit("players", { players: game.players.map(sendablePlayer) })
+        // socket.emit("players", { players: game.players.map(sendablePlayer) })
         socket.emit("enemies", { enemies: game.enemies })
         socket.emit("species", { species: game.species })
         socket.emit("walls",   {   walls: game.walls   })
 
-        // create a new player
-        let firstFree = firstEmptyCell(game)
-        let new_player = newPlayer(socket, name, firstFree.x, firstFree.y)
+        const player = game.players.filter(player => player.name === name)[0]
+        if(!player){
+            console.log("'" + name + "' joined the game")
 
-        socket.player_name = name
-        
-        // add this player to the players list
-        game.players.push(new_player)
+            // create a new player
+            let firstFree = firstEmptyCell(game)
+            let new_player = newPlayer(socket, name, firstFree.x, firstFree.y)
+    
+            socket.player_name = name
+            
+            // add this player to the players list
+            game.players.push(new_player)
+    
+            // tell everyone else a new player as connected
+            io.emit("players", {
+                players: game.players.map(sendablePlayer),
+            })
 
-        // tell everyone else a new player as connected
-        io.emit("players", {
-            players: game.players.map(sendablePlayer),
-        })
+        }else{
+            console.log("'" + name + "' re-joined the game")
 
-        console.log("'" + name + "' joined the game")
+            // enter as the player found
+            socket.player_name = name
+            player.socket = socket
+            // tell everyone else player as connected
+            io.emit("players", {
+                players: game.players.map(sendablePlayer),
+            })
+
+        }
+
     })
 
     socket.on("disconnect", function() {
@@ -66,9 +88,10 @@ io.on("connection", function(socket) {
         const name = player.name.toString()
 
         // remove player from game.players
-        game.players = game.players.filter(
+        /*game.players = game.players.filter(
             player => player.name !== socket.player_name
-        )
+        )*/
+        player.socket = undefined
 
         // comunicate that player has disconnected
         io.emit("players", {
@@ -76,6 +99,31 @@ io.on("connection", function(socket) {
         })
 
         console.log("'" + name + "' disconnected")
+    })
+
+    socket.on("load_game", function(new_game){
+        // remove all sockets
+        new_game.players.forEach(p => p.has_socket = false)
+
+        // assign new sockets
+        game.players.forEach(p => {
+            let new_p = new_game.players.filter(c => c.name === p.name)[0]
+            if(new_p) {
+                new_p.socket = p.socket
+                new_p.master = p.master
+            }
+        });
+
+        // set game
+        game = new_game
+        
+        // comunicate changes
+        socket.emit("players", { players: game.players.map(sendablePlayer) })
+        socket.emit("enemies", { enemies: game.enemies })
+        socket.emit("species", { species: game.species })
+        socket.emit("walls",   {   walls: game.walls   })
+
+        console.log("Game loaded")
     })
 
     socket.on("move", function(name, new_x, new_y){

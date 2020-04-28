@@ -81,6 +81,7 @@ function sendablePlayer(player){
         ini: player.ini,
         type: player.type,
         master: player.master,
+        has_socket: !(player.socket === undefined || player.socket === null)
     }
 }
 
