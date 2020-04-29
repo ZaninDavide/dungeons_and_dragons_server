@@ -101,6 +101,26 @@ io.on("connection", function(socket) {
         console.log("'" + name + "' disconnected")
     })
 
+    socket.on("exit_game", function() {
+        if (socket.player_name === undefined) return
+
+        const player = game.players.filter(player => player.name === socket.player_name)[0]
+        if(!player) return
+        const name = player.name.toString()
+
+        // remove player from game.players
+        game.players = game.players.filter(
+            player => player.name !== socket.player_name
+        )
+
+        // comunicate that player has disconnected
+        io.emit("players", {
+            players: game.players.map(sendablePlayer),
+        })
+
+        console.log("'" + name + "' leaved game")
+    })
+
     socket.on("load_game", function(new_game){
         // remove all sockets
         new_game.players.forEach(p => p.has_socket = false)
@@ -111,6 +131,8 @@ io.on("connection", function(socket) {
             if(new_p) {
                 new_p.socket = p.socket
                 new_p.master = p.master
+            }else{
+                new_game.players.push(p)
             }
         });
 
