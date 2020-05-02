@@ -15,6 +15,10 @@ app.get("/", function(req, res) {
     res.send("'Dungueons and Dragons' is listening")
 })
 
+app.get("/keepAlive", function(req, res) {
+    res.send(true)
+})
+
 app.get("/game", function(req, res) {
     let sendableGame = {
         players: game.players.map(sendablePlayer),
@@ -24,6 +28,10 @@ app.get("/game", function(req, res) {
     }
     res.send(sendableGame)
 })
+
+/*app.get("/players", function(req, res) {
+    res.send(game.players.map(sendablePlayer))
+})*/
 
 /*app.get("/stupidClearEnemies", function(req, res) {
     game.enemies = []
